@@ -1,33 +1,46 @@
 import React, { useEffect, useContext } from 'react';
 import axios from 'axios';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
 import './styles/App.scss';
 
 import { CaseContext } from './context/CaseContext';
 
-import Map from './components/Map';
+import MapView from './components/MapView';
 import Search from './components/Search';
 import Info from './components/Info';
 
 function App() {
-  const { setCaseData } = useContext(CaseContext);
+  let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+  });
 
+  L.Marker.prototype.options.icon = DefaultIcon;
+
+  const { caseData, setCaseData } = useContext(CaseContext);
   useEffect(() => {
     axios
-      .get(process.env.REACT_APP_DATA_NSW_GOV_AU_API)
+      .get('http://coronavirus-tracker-api.herokuapp.com/v2/locations')
       .then((res) => {
-        // console.log(res);
-        const records = res.data.result.records;
-        setCaseData(records);
-        console.log(records);
+        const cases = Array.from(res.data.locations);
+        console.log(cases);
+        let tmp = [];
+        cases.forEach((item) => {
+          tmp = [...tmp, item];
+        });
+        setCaseData(tmp);
       })
       .catch((error) => console.log(error));
   }, [setCaseData]);
-
   return (
     <div className='App'>
       <Search />
       {/* <Info /> */}
-      <Map />
+      <MapView />
     </div>
   );
 }
