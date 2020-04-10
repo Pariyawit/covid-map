@@ -1,7 +1,6 @@
 import React from 'react';
 import GoogleMapReact from 'google-map-react';
 import Marker from './Marker';
-// import {GoogleApiWrapper} from 'google-maps-react';
 
 function Map(props) {
   const tmp = {
@@ -14,7 +13,7 @@ function Map(props) {
   return (
     <div style={{ height: '100vh', width: '100%' }}>
       <GoogleMapReact
-        bootstrapURLKeys={{ key: 'AIzaSyDYIeTv6Uyp1p0s_WRDZizp6Zp2ZoXYe-I' }}
+        bootstrapURLKeys={{ key: process.env.REACT_APP_GOOGLE_MAP_KEY }}
         defaultCenter={tmp.center}
         defaultZoom={tmp.zoom}
       >

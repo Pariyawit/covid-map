@@ -9,28 +9,19 @@ import Search from './components/Search';
 import Info from './components/Info';
 
 function App() {
-  const context = useContext(CaseContext);
+  const { setCaseData } = useContext(CaseContext);
 
   useEffect(() => {
     axios
-      .get(
-        '/data/api/3/action/datastore_search?resource_id=21304414-1ff1-4243-a5d2-f52778048b29',
-        'https://jsonplaceholder.typicode.com/todos'
-        // {
-        //   mode: 'no-cors',
-        //   headers: {
-        //     'Access-Control-Allow-Origin': '*',
-        //     'Content-Type': 'application/json',
-        //   },
-        //   'Access-Control-Allow-Credentials': true,
-        //   credentials: 'same-origin',
-        // }
-      )
+      .get(process.env.REACT_APP_DATA_NSW_GOV_AU_API)
       .then((res) => {
-        console.log(res);
+        // console.log(res);
+        const records = res.data.result.records;
+        setCaseData(records);
+        console.log(records);
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [setCaseData]);
 
   return (
     <div className='App'>
