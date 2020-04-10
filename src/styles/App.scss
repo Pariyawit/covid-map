@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import './_variable';
+html {
+  font-family: 'Roboto', sans-serif;
+  font-size: 62.5%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+.card {
+  background: #fff;
+  padding: 1.2rem;
+  border-radius: 10px;
+}
+
+.marker {
+  width: 155px;
+  box-shadow: 12px 12px 16px rgba(0, 0, 0, 0.25);
+  &--title {
+    font-size: 1.2rem;
+    color: $text-secondary;
+  }
+  &--info {
+    font-size: 2.2rem;
+    margin: 1rem 0 0 0;
+    text-align: center;
+  }
+  &::after {
+    //draw triangle
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 20px solid #fff;
+    position: absolute;
+    top: 70px;
+    left: 72px;
+  }
+}
+
+.search {
+  width: calc(100vw - 64px);
+  max-width: 320px;
+  margin: 16px;
+  position: absolute;
+  top: 0;
+  z-index: 99;
+
+  box-shadow: 7px 7px 12px rgba(0, 0, 0, 0.25);
+  z-index: 99;
+  width: 100%;
+  input {
+    font-size: 2rem;
+    border: none;
+  }
+}
+
+.info {
+  width: calc(100vw - 64px);
+  max-width: 320px;
+  margin: 16px;
+  position: absolute;
+  bottom: 0;
+  z-index: 99;
+
+  box-shadow: 7px 7px 12px rgba(0, 0, 0, 0.25);
+  z-index: 99;
+  width: 100%;
+  input {
+    font-size: 2rem;
+    border: none;
+  }
+}
+
+textarea,
+select,
+input,
+button {
+  outline: none;
+}
