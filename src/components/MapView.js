@@ -1,8 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import axios from 'axios';
-// import Marker from './Marker';
-import { Map, Marker, Circle, Popup, TileLayer } from 'react-leaflet';
-
+import { Map, Marker, TileLayer } from 'react-leaflet';
 import { CaseContext } from './../context/CaseContext';
 import { divIcon } from 'leaflet';
 /*
@@ -24,48 +21,62 @@ latest:
 
 const icon_purple = divIcon({
   className: 'marker-icon--purple',
+  iconSize: [40, 40],
+});
+const icon_red = divIcon({
+  className: 'marker-icon--red',
   iconSize: [32, 32],
 });
-const icon_red = divIcon({ className: 'marker-icon--red', iconSize: [32, 32] });
 const icon_orange = divIcon({
   className: 'marker-icon--orange',
-  iconSize: [32, 32],
+  iconSize: [24, 24],
 });
 const icon_green = divIcon({
   className: 'marker-icon--green',
-  iconSize: [32, 32],
+  iconSize: [16, 16],
 });
 
 function MapView(props) {
-  const position = [51.505, -0.09];
-  const { caseData } = useContext(CaseContext);
+  const { caseData, clickMarker, position, country } = useContext(CaseContext);
   const markers = caseData.map((data) => (
     <Marker
       key={data.id}
       position={[data.coordinates.latitude, data.coordinates.longitude]}
       icon={
         data.latest.confirmed >= 100000
-          ? icon_purple
+          ? divIcon({
+              className:
+                data.id == (country && country.id)
+                  ? 'marker-icon--purple active'
+                  : 'marker-icon--purple',
+              iconSize: [40, 40],
+            })
           : data.latest.confirmed >= 10000
-          ? icon_red
+          ? divIcon({
+              className:
+                data.id == (country && country.id)
+                  ? 'marker-icon--red active'
+                  : 'marker-icon--red',
+              iconSize: [32, 32],
+            })
           : data.latest.confirmed >= 1000
-          ? icon_orange
-          : icon_green
+          ? divIcon({
+              className:
+                data.id == (country && country.id)
+                  ? 'marker-icon--orange active'
+                  : 'marker-icon--orange',
+              iconSize: [25, 25],
+            })
+          : divIcon({
+              className:
+                data.id == (country && country.id)
+                  ? 'marker-icon--green active'
+                  : 'marker-icon--green',
+              iconSize: [16, 16],
+            })
       }
-      // icon={
-      //   data.latest.confirmed > 100000
-      //     ? {
-      //         className: 'marker-icon--purple',
-      //         iconSize: [
-      //           data.latest.confirmed / 100,
-      //           data.latest.confirmed / 100,
-      //         ],
-      //       }
-      //     : ''
-      // }
-    >
-      hello
-    </Marker>
+      onClick={(e) => clickMarker(e.target, data.id)}
+    ></Marker>
   ));
 
   return (
