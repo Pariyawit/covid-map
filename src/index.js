@@ -2,10 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import { CaseContextProvider } from './context/CaseContext';
 
 ReactDOM.render(
-  <div>
+  <CaseContextProvider>
     <App />
-  </div>,
+  </CaseContextProvider>,
   document.getElementById('root')
 );
