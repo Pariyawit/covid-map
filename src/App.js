@@ -21,14 +21,13 @@ function App() {
 
   L.Marker.prototype.options.icon = DefaultIcon;
 
-  const { caseData, setCaseData, setSearchItems } = useContext(CaseContext);
+  const { setCaseData } = useContext(CaseContext);
 
   useEffect(() => {
     axios
       .get('http://coronavirus-tracker-api.herokuapp.com/v2/locations')
       .then((res) => {
         const cases = Array.from(res.data.locations);
-        console.log(cases);
         let tmp = [];
         cases.forEach((item) => {
           tmp = [...tmp, item];

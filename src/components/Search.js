@@ -4,11 +4,12 @@ import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { CaseContext } from './../context/CaseContext';
 
 export default function Search() {
-  const { clickSearch, caseData } = useContext(CaseContext);
+  const { clickSearch, caseData, showSearch, setShowSearch } = useContext(
+    CaseContext
+  );
 
   const [search, setSearch] = useState('');
   const [searchItems, setSearchItems] = useState(caseData);
-  const [showItems, setShowItem] = useState(false);
 
   useEffect(() => {
     setSearchItems(caseData);
@@ -25,11 +26,11 @@ export default function Search() {
       setSearchItems(caseData);
     }
 
-    setShowItem(true);
+    setShowSearch(true);
   };
 
   const handleClick = (e) => {
-    setShowItem(true);
+    setShowSearch(true);
   };
 
   const caseClass = (confirmedCase) => {
@@ -70,7 +71,9 @@ export default function Search() {
           ></input>
           <FontAwesomeIcon className='search__icon' icon={faSearch} size='lg' />
         </div>
-        {showItems && <div className='result'>{searchList}</div>}
+        {showSearch && searchItems.length > 0 && (
+          <div className='result'>{searchList}</div>
+        )}
       </div>
     </div>
   );

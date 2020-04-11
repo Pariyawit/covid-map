@@ -19,68 +19,73 @@ latest:
   recovered: 0
 */
 
-const icon_purple = divIcon({
-  className: 'marker-icon--purple',
-  iconSize: [40, 40],
-});
-const icon_red = divIcon({
-  className: 'marker-icon--red',
-  iconSize: [32, 32],
-});
-const icon_orange = divIcon({
-  className: 'marker-icon--orange',
-  iconSize: [24, 24],
-});
-const icon_green = divIcon({
-  className: 'marker-icon--green',
-  iconSize: [16, 16],
-});
+const divIconObject = (data, country) => {
+  if (data.latest.confirmed >= 100000) {
+    return {
+      className:
+        data.id === (country && country.id)
+          ? 'marker-icon--purple active'
+          : 'marker-icon--purple',
+      iconSize: [40, 40],
+    };
+  } else if (data.latest.confirmed >= 10000) {
+    return {
+      className:
+        data.id === (country && country.id)
+          ? 'marker-icon--red active'
+          : 'marker-icon--red',
+      iconSize: [32, 32],
+    };
+  } else if (data.latest.confirmed >= 1000) {
+    return {
+      className:
+        data.id === (country && country.id)
+          ? 'marker-icon--orange active'
+          : 'marker-icon--orange',
+      iconSize: [24, 24],
+    };
+  } else {
+    return {
+      className:
+        data.id === (country && country.id)
+          ? 'marker-icon--green active'
+          : 'marker-icon--green',
+      iconSize: [16, 16],
+    };
+  }
+};
 
 function MapView(props) {
-  const { caseData, clickMarker, position, country } = useContext(CaseContext);
+  const {
+    caseData,
+    clickMarker,
+    position,
+    country,
+    setShowInfo,
+    setShowSearch,
+  } = useContext(CaseContext);
+
+  const clickMap = () => {
+    setShowInfo(false);
+    setShowSearch(false);
+  };
+
   const markers = caseData.map((data) => (
     <Marker
       key={data.id}
       position={[data.coordinates.latitude, data.coordinates.longitude]}
-      icon={
-        data.latest.confirmed >= 100000
-          ? divIcon({
-              className:
-                data.id == (country && country.id)
-                  ? 'marker-icon--purple active'
-                  : 'marker-icon--purple',
-              iconSize: [40, 40],
-            })
-          : data.latest.confirmed >= 10000
-          ? divIcon({
-              className:
-                data.id == (country && country.id)
-                  ? 'marker-icon--red active'
-                  : 'marker-icon--red',
-              iconSize: [32, 32],
-            })
-          : data.latest.confirmed >= 1000
-          ? divIcon({
-              className:
-                data.id == (country && country.id)
-                  ? 'marker-icon--orange active'
-                  : 'marker-icon--orange',
-              iconSize: [25, 25],
-            })
-          : divIcon({
-              className:
-                data.id == (country && country.id)
-                  ? 'marker-icon--green active'
-                  : 'marker-icon--green',
-              iconSize: [16, 16],
-            })
-      }
+      icon={divIcon(divIconObject(data, country))}
       onClick={(e) => clickMarker(e.target, data.id)}
     ></Marker>
   ));
 
   return (
-    <Map center={position} zoom={3} style={{ height: '100vh', zIndox: '0' }}>
+    <Map
+      center={position}
+      zoom={3}
+      style={{ height: '100vh', zIndox: '0' }}
+      onClick={clickMap}
+    >
       <TileLayer
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

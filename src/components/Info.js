@@ -2,8 +2,8 @@ import React, { useContext } from 'react';
 import { CaseContext } from './../context/CaseContext';
 
 export default function Info() {
-  const { country } = useContext(CaseContext);
-  return country ? (
+  const { country, showInfo } = useContext(CaseContext);
+  return country && showInfo ? (
     <div className='info card' style={{ zIndex: 1000 }}>
       <h3 className='info__title'>
         {country.province && `${country.province}, `}
