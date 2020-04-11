@@ -25,7 +25,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get('http://coronavirus-tracker-api.herokuapp.com/v2/locations')
+      .get('https://coronavirus-tracker-api.herokuapp.com/v2/locations')
       .then((res) => {
         const cases = Array.from(res.data.locations);
         let tmp = [];
