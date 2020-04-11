@@ -9,6 +9,7 @@ export default function Search() {
     caseData,
     showSearch,
     setShowSearch,
+    setShowInfo,
     clickMarker,
   } = useContext(CaseContext);
 
@@ -39,10 +40,12 @@ export default function Search() {
     }
 
     setShowSearch(true);
+    setShowInfo(false);
   };
 
   const handleClick = (e) => {
     setShowSearch(true);
+    setShowInfo(false);
   };
 
   const caseClass = (confirmedCase) => {
