@@ -13,7 +13,13 @@ function CaseContextProvider(props) {
     setCountry(data);
   };
 
-  const context = { caseData, setCaseData, clickMarker, position, country };
+  const context = {
+    caseData,
+    setCaseData,
+    clickMarker,
+    position,
+    country,
+  };
 
   return (
     <CaseContext.Provider value={context}>
