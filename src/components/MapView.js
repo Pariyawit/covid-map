@@ -75,7 +75,7 @@ function MapView(props) {
       key={data.id}
       position={[data.coordinates.latitude, data.coordinates.longitude]}
       icon={divIcon(divIconObject(data, country))}
-      onClick={(e) => clickMarker(e.target, data.id)}
+      onClick={(e) => clickMarker(data.id)}
     ></Marker>
   ));
 

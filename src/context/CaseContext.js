@@ -9,7 +9,7 @@ function CaseContextProvider(props) {
   const [showSearch, setShowSearch] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
-  const clickMarker = (target, id) => {
+  const clickMarker = (id) => {
     const data = caseData.find((data) => data.id == id);
     setPosition([data.coordinates.latitude, data.coordinates.longitude]);
     setCountry(data);

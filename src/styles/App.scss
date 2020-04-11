@@ -69,8 +69,10 @@ h6 {
     display: flex;
     justify-content: space-between;
     justify-items: center;
-    &:hover {
-      background: $focus;
+    @media (min-width: $sm) {
+      &:hover {
+        background: $focus;
+      }
     }
     &:active {
       background: $focus-2;

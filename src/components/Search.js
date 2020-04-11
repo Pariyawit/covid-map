@@ -4,9 +4,13 @@ import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { CaseContext } from './../context/CaseContext';
 
 export default function Search() {
-  const { clickSearch, caseData, showSearch, setShowSearch } = useContext(
-    CaseContext
-  );
+  const {
+    clickSearch,
+    caseData,
+    showSearch,
+    setShowSearch,
+    clickMarker,
+  } = useContext(CaseContext);
 
   const [search, setSearch] = useState('');
   const [searchItems, setSearchItems] = useState(caseData);
@@ -14,6 +18,14 @@ export default function Search() {
   useEffect(() => {
     setSearchItems(caseData);
   }, [caseData]);
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      console.log('enter');
+      clickMarker(searchItems[0].id);
+      setShowSearch(false);
+    }
+  };
 
   const handleChange = (e) => {
     setSearch(e.target.value);
@@ -49,7 +61,14 @@ export default function Search() {
   const searchList =
     searchItems &&
     searchItems.map((item) => (
-      <div className='result__item' key={item.id}>
+      <div
+        className='result__item'
+        key={item.id}
+        onClick={() => {
+          clickMarker(item.id);
+          setShowSearch(false);
+        }}
+      >
         <span className='result__country'>{title(item)}</span>
         <span className={caseClass(item.latest.confirmed)}>
           {item.latest.confirmed.toLocaleString()}
@@ -68,6 +87,7 @@ export default function Search() {
             name='search'
             onChange={handleChange}
             onClick={handleClick}
+            onKeyPress={handleKeyPress}
           ></input>
           <FontAwesomeIcon className='search__icon' icon={faSearch} size='lg' />
         </div>
