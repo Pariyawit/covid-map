@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Map, Marker, TileLayer } from 'react-leaflet';
+import React, { useContext, useState, useRef } from 'react';
+import { Map, Marker, TileLayer, ZoomControl } from 'react-leaflet';
 import { CaseContext } from './../context/CaseContext';
-import { divIcon } from 'leaflet';
+import L, { divIcon } from 'leaflet';
 /*
 id: 0
 country: "Afghanistan"
@@ -19,38 +19,39 @@ latest:
   recovered: 0
 */
 
-const divIconObject = (data, country) => {
+const divIconObject = (data, country, zoom) => {
+  const size = zoom / 3;
   if (data.latest.confirmed >= 100000) {
     return {
       className:
         data.id === (country && country.id)
-          ? 'marker-icon--purple active'
-          : 'marker-icon--purple',
-      iconSize: [40, 40],
+          ? 'marker-icon marker-icon--purple active'
+          : 'marker-icon marker-icon--purple',
+      iconSize: [40 * size, 40 * size],
     };
   } else if (data.latest.confirmed >= 10000) {
     return {
       className:
         data.id === (country && country.id)
-          ? 'marker-icon--red active'
-          : 'marker-icon--red',
-      iconSize: [32, 32],
+          ? 'marker-icon marker-icon--red active'
+          : 'marker-icon marker-icon--red',
+      iconSize: [32 * size, 32 * size],
     };
   } else if (data.latest.confirmed >= 1000) {
     return {
       className:
         data.id === (country && country.id)
-          ? 'marker-icon--orange active'
-          : 'marker-icon--orange',
-      iconSize: [24, 24],
+          ? 'marker-icon marker-icon--orange active'
+          : 'marker-icon marker-icon--orange',
+      iconSize: [24 * size, 24 * size],
     };
   } else {
     return {
       className:
         data.id === (country && country.id)
-          ? 'marker-icon--green active'
-          : 'marker-icon--green',
-      iconSize: [16, 16],
+          ? 'marker-icon marker-icon--green active'
+          : 'marker-icon marker-icon--green',
+      iconSize: [16 * size, 16 * size],
     };
   }
 };
@@ -65,6 +66,17 @@ function MapView(props) {
     setShowSearch,
   } = useContext(CaseContext);
 
+  const [zoom, setZoom] = useState(3);
+
+  const mapEl = useRef(null);
+
+  const handleZoom = (e) => {
+    setZoom(mapEl.current.leafletElement._zoom);
+    if (mapEl.current.leafletElement._zoom < 2) {
+      setZoom(2);
+    }
+  };
+
   const clickMap = () => {
     setShowInfo(false);
     setShowSearch(false);
@@ -74,7 +86,7 @@ function MapView(props) {
     <Marker
       key={data.id}
       position={[data.coordinates.latitude, data.coordinates.longitude]}
-      icon={divIcon(divIconObject(data, country))}
+      icon={divIcon(divIconObject(data, country, zoom))}
       onClick={(e) => clickMarker(data.id)}
     ></Marker>
   ));
@@ -82,15 +94,24 @@ function MapView(props) {
   return (
     <Map
       center={position}
-      zoom={3}
+      zoom={zoom}
       style={{ height: '100vh', zIndox: '0' }}
       onClick={clickMap}
+      zoomControl={false}
+      ref={mapEl}
+      onZoomEnd={handleZoom}
+      options={{ minZoom: 2 }}
+      maxBounds={[
+        [-85, -180],
+        [85, 180],
+      ]}
     >
       <TileLayer
         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       {markers}
+      <ZoomControl position='topright' />
     </Map>
   );
 }

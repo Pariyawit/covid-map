@@ -32,7 +32,7 @@ export default function Search() {
     setSearch(e.target.value);
     if (e.target.value != '') {
       const list = caseData.filter((data) =>
-        data.country.toLowerCase().includes(e.target.value.toLowerCase())
+        title(data).toLowerCase().includes(e.target.value.toLowerCase())
       );
       setSearchItems(list);
     } else {
