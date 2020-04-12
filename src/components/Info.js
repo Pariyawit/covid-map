@@ -14,6 +14,9 @@ export default function Info() {
         <br />
         Deaths: {country.latest.deaths.toLocaleString()}
       </p>
+      <p className='info__lastUpdate'>
+        Last Updated: {country.last_updated.slice(0, 19).replace('T', ' ')} UTC
+      </p>
     </div>
   ) : (
     ''
