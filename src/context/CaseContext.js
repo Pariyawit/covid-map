@@ -4,7 +4,7 @@ const CaseContext = React.createContext();
 
 function CaseContextProvider(props) {
   const [caseData, setCaseData] = useState([]);
-  const [position, setPosition] = useState([51.505, -0.09]);
+  const [position, setPosition] = useState([35.9, 14.37]);
   const [country, setCountry] = useState();
   const [showSearch, setShowSearch] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
