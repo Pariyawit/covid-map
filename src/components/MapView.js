@@ -1,7 +1,7 @@
 import React, { useContext, useState, useRef } from 'react';
 import { Map, Marker, TileLayer, ZoomControl } from 'react-leaflet';
 import { CaseContext } from './../context/CaseContext';
-import L, { divIcon } from 'leaflet';
+import { divIcon } from 'leaflet';
 /*
 id: 0
 country: "Afghanistan"
@@ -25,11 +25,20 @@ const divIconObject = (data, country, zoom) => {
     return {
       className:
         data.id === (country && country.id)
+          ? 'marker-icon marker-icon--dark-purple active'
+          : 'marker-icon marker-icon--dark-purple',
+      iconSize: [48 * size, 48 * size],
+    };
+  }
+  if (data.latest.confirmed >= 10000) {
+    return {
+      className:
+        data.id === (country && country.id)
           ? 'marker-icon marker-icon--purple active'
           : 'marker-icon marker-icon--purple',
       iconSize: [40 * size, 40 * size],
     };
-  } else if (data.latest.confirmed >= 10000) {
+  } else if (data.latest.confirmed >= 1000) {
     return {
       className:
         data.id === (country && country.id)
@@ -37,7 +46,7 @@ const divIconObject = (data, country, zoom) => {
           : 'marker-icon marker-icon--red',
       iconSize: [32 * size, 32 * size],
     };
-  } else if (data.latest.confirmed >= 1000) {
+  } else if (data.latest.confirmed >= 100) {
     return {
       className:
         data.id === (country && country.id)
@@ -62,6 +71,7 @@ function MapView(props) {
     clickMarker,
     position,
     country,
+    setCountry,
     setShowInfo,
     setShowSearch,
   } = useContext(CaseContext);
@@ -80,6 +90,7 @@ function MapView(props) {
   const clickMap = () => {
     setShowInfo(false);
     setShowSearch(false);
+    setCountry(null);
   };
 
   const markers = caseData.map((data) => (
@@ -102,8 +113,8 @@ function MapView(props) {
       onZoomEnd={handleZoom}
       options={{ minZoom: 2 }}
       maxBounds={[
-        [-85, -180],
-        [85, 180],
+        [-75, -200],
+        [85, 200],
       ]}
     >
       <TileLayer

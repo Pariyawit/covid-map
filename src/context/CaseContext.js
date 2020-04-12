@@ -22,6 +22,7 @@ function CaseContextProvider(props) {
     clickMarker,
     position,
     country,
+    setCountry,
     showInfo,
     showSearch,
     setShowSearch,

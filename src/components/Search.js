@@ -50,9 +50,10 @@ export default function Search() {
 
   const caseClass = (confirmedCase) => {
     const className = 'result__case result__case';
-    if (confirmedCase >= 100000) return className + '--purple';
-    if (confirmedCase >= 10000) return className + '--red';
-    if (confirmedCase >= 1000) return className + '--orange';
+    if (confirmedCase >= 100000) return className + '--dark-purple';
+    if (confirmedCase >= 10000) return className + '--purple';
+    if (confirmedCase >= 1000) return className + '--red';
+    if (confirmedCase >= 100) return className + '--orange';
     return className + '--green';
   };
 

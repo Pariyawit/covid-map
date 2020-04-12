@@ -104,6 +104,9 @@ h6 {
     &--purple {
       background-color: $purple;
     }
+    &--dark-purple {
+      background-color: $dark-purple;
+    }
   }
 }
 
@@ -150,6 +153,13 @@ h6 {
     box-shadow: 0px 0px 16px rgba(138, 57, 151, 0.5);
     &.active {
       background: #b750c8;
+    }
+  }
+  &--dark-purple {
+    background: rgba(98, 67, 165, 0.75);
+    box-shadow: 0px 0px 24px rgba(94, 64, 156, 0.5);
+    &.active {
+      background: #7650c8;
     }
   }
   &.active {
