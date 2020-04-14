@@ -12,6 +12,7 @@ import { CaseContext } from './context/CaseContext';
 import MapView from './components/MapView';
 import Search from './components/Search';
 import Info from './components/Info';
+import About from './components/About';
 
 function App() {
   let DefaultIcon = L.icon({
@@ -43,6 +44,7 @@ function App() {
       <Search />
       <Info />
       <MapView />
+      <About />
     </div>
   );
 }

@@ -74,6 +74,7 @@ function MapView(props) {
     setCountry,
     setShowInfo,
     setShowSearch,
+    setShowAbout,
   } = useContext(CaseContext);
 
   const [zoom, setZoom] = useState(3);
@@ -91,6 +92,7 @@ function MapView(props) {
     setShowInfo(false);
     setShowSearch(false);
     setCountry(null);
+    setShowAbout(false);
   };
 
   const markers = caseData.map((data) => (
