@@ -82,7 +82,7 @@ export default function Search() {
 
   return (
     <div className='search-wrapper'>
-      <div className='search card' style={{ zIndex: 1000 }}>
+      <div className='search card' style={{ zIndex: 999 }}>
         <div className='search__bar' onClick={() => clickSearch}>
           <input
             className='search__text'

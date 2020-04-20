@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -16,8 +16,11 @@ import MapView from './components/MapView';
 import Search from './components/Search';
 import Info from './components/Info';
 import About from './components/About';
+import Loader from './components/Loader';
 
 function App() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
@@ -112,12 +115,17 @@ function App() {
           setCaseData(
             list.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
           );
+          setLoading(false);
         })
       )
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        setError(true);
+      });
   }, [setCaseData]);
   return (
     <div className='App'>
+      <Loader loading={loading} error={error} />
       <Search />
       <Info />
       <MapView />
