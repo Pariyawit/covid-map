@@ -99,9 +99,9 @@ function MapView(props) {
 
   const markers = caseData
     .filter((data) => {
-      if (data.level === 0) return true;
-      if (zoom < 4 && data.level === 1) return true;
-      if (zoom >= 4 && data.level === 2) return true;
+      if (data.level === 'all') return true;
+      if (zoom < 4 && data.level === 'country') return true;
+      if (zoom >= 4 && data.level === 'province') return true;
       return false;
     })
     .map((data) => (

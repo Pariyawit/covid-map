@@ -10,6 +10,7 @@ import './styles/App.scss';
 import { CaseContext } from './context/CaseContext';
 
 import { statesData } from './data/statesData';
+import { centroidsData } from './data/centroidsData';
 
 import MapView from './components/MapView';
 import Search from './components/Search';
@@ -36,22 +37,61 @@ function App() {
       .then(
         axios.spread((res, resUS) => {
           const cases = Array.from(res.data.locations);
-          let tmp = [];
+          let list = [];
 
-          cases.forEach((item) => {
-            item.level = 0;
-            item.key = item.id + item.country + item.province;
-            if (item.country === 'US') item.level = 1;
-            tmp = [...tmp, item];
-          });
+          cases
+            // .filter((item) => item.country === 'Australia')
+            .forEach((item) => {
+              if (item.province === '') {
+                item.level = 'all';
+                item.key = item.id + item.country;
+                if (item.country === 'US') item.level = 'country';
+                list = [...list, item];
+              } else {
+                item.level = 'province';
+                item.key = item.id + item.country + item.province;
+                list = [...list, item];
+
+                let tmpItem = {
+                  ...item,
+                  latest: {
+                    ...item.latest,
+                  },
+                  coordinates: {
+                    ...item.coordinates,
+                  },
+                  province: '',
+                  level: 'country',
+                  key: item.id + item.country,
+                };
+                const index = list
+                  .map((e) => e.province + e.country)
+                  .indexOf(tmpItem.country);
+                if (index === -1) {
+                  const countryItem = centroidsData.find(
+                    (e) => e.ISO3136 === item.country_code
+                  );
+                  if (countryItem) {
+                    tmpItem.coordinates.latitude = countryItem.LAT;
+                    tmpItem.coordinates.longitude = countryItem.LONG;
+                    list = [...list, tmpItem];
+                  }
+                } // existing state
+                else {
+                  list[index].latest.confirmed += tmpItem.latest.confirmed;
+                  list[index].latest.deaths += tmpItem.latest.deaths;
+                  list[index].latest.recovered += tmpItem.latest.recovered;
+                }
+              }
+            });
 
           const casesUS = Array.from(resUS.data.locations);
           casesUS.forEach((item) => {
             //new state
-            const index = tmp.map((e) => e.province).indexOf(item.province);
+            const index = list.map((e) => e.province).indexOf(item.province);
             if (index === -1) {
               item.county = '';
-              item.level = 2;
+              item.level = 'province';
               item.key = item.id + item.country + item.province;
               const stateItem = statesData.find(
                 (e) => e.name === item.province
@@ -59,18 +99,18 @@ function App() {
               if (stateItem) {
                 item.coordinates.latitude = stateItem.latitude;
                 item.coordinates.longitude = stateItem.longitude;
-                tmp = [...tmp, item];
+                list = [...list, item];
               }
             } // existing state
             else {
               // console.log(item);
-              tmp[index].latest.confirmed += item.latest.confirmed;
-              tmp[index].latest.deaths += item.latest.deaths;
-              tmp[index].latest.recovered += item.latest.recovered;
+              list[index].latest.confirmed += item.latest.confirmed;
+              list[index].latest.deaths += item.latest.deaths;
+              list[index].latest.recovered += item.latest.recovered;
             }
           });
           setCaseData(
-            tmp.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
+            list.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
           );
         })
       )
