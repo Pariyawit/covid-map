@@ -23,7 +23,7 @@ export default function Search() {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       console.log('enter');
-      clickMarker(searchItems[0].id);
+      clickMarker(searchItems[0].key);
       setShowSearch(false);
     }
   };
@@ -67,9 +67,9 @@ export default function Search() {
     searchItems.map((item) => (
       <div
         className='result__item'
-        key={item.id}
+        key={item.key}
         onClick={() => {
-          clickMarker(item.id);
+          clickMarker(item.key);
           setShowSearch(false);
         }}
       >

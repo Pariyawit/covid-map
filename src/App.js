@@ -9,6 +9,9 @@ import './styles/App.scss';
 
 import { CaseContext } from './context/CaseContext';
 
+import { statesData } from './data/statesData';
+import { centroidsData } from './data/centroidsData';
+
 import MapView from './components/MapView';
 import Search from './components/Search';
 import Info from './components/Info';
@@ -25,18 +28,92 @@ function App() {
   const { setCaseData } = useContext(CaseContext);
 
   useEffect(() => {
+    const url1 = 'https://coronavirus-tracker-api.herokuapp.com/v2/locations';
+    const url2 =
+      'https://coronavirus-tracker-api.herokuapp.com/v2/locations?source=csbs';
+
     axios
-      .get('https://coronavirus-tracker-api.herokuapp.com/v2/locations')
-      .then((res) => {
-        const cases = Array.from(res.data.locations);
-        let tmp = [];
-        cases.forEach((item) => {
-          tmp = [...tmp, item];
-        });
-        setCaseData(
-          tmp.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
-        );
-      })
+      .all([axios.get(url1), axios.get(url2)])
+      .then(
+        axios.spread((res, resUS) => {
+          const cases = Array.from(res.data.locations);
+          let list = [];
+
+          cases
+            // .filter((item) => item.country === 'Australia')
+            .forEach((item) => {
+              if (item.province === '') {
+                item.level = 'all';
+                item.key = item.id + item.country;
+                if (item.country === 'US') item.level = 'country';
+                list = [...list, item];
+              } else {
+                item.level = 'province';
+                item.key = item.id + item.country + item.province;
+                list = [...list, item];
+
+                let tmpItem = {
+                  ...item,
+                  latest: {
+                    ...item.latest,
+                  },
+                  coordinates: {
+                    ...item.coordinates,
+                  },
+                  province: '',
+                  level: 'country',
+                  key: item.id + item.country,
+                };
+                const index = list
+                  .map((e) => e.province + e.country)
+                  .indexOf(tmpItem.country);
+                if (index === -1) {
+                  const countryItem = centroidsData.find(
+                    (e) => e.ISO3136 === item.country_code
+                  );
+                  if (countryItem) {
+                    tmpItem.coordinates.latitude = countryItem.LAT;
+                    tmpItem.coordinates.longitude = countryItem.LONG;
+                    list = [...list, tmpItem];
+                  }
+                } // existing state
+                else {
+                  list[index].latest.confirmed += tmpItem.latest.confirmed;
+                  list[index].latest.deaths += tmpItem.latest.deaths;
+                  list[index].latest.recovered += tmpItem.latest.recovered;
+                }
+              }
+            });
+
+          const casesUS = Array.from(resUS.data.locations);
+          casesUS.forEach((item) => {
+            //new state
+            const index = list.map((e) => e.province).indexOf(item.province);
+            if (index === -1) {
+              item.county = '';
+              item.level = 'province';
+              item.key = item.id + item.country + item.province;
+              const stateItem = statesData.find(
+                (e) => e.name === item.province
+              );
+              if (stateItem) {
+                item.coordinates.latitude = stateItem.latitude;
+                item.coordinates.longitude = stateItem.longitude;
+                list = [...list, item];
+              }
+            } // existing state
+            else {
+              // console.log(item);
+              list[index].latest.confirmed += item.latest.confirmed;
+              list[index].latest.deaths += item.latest.deaths;
+              list[index].latest.recovered += item.latest.recovered;
+            }
+          });
+          setCaseData(
+            list.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
+          );
+        })
+      )
       .catch((error) => console.log(error));
   }, [setCaseData]);
   return (
