@@ -9,6 +9,8 @@ import './styles/App.scss';
 
 import { CaseContext } from './context/CaseContext';
 
+import { statesData } from './data/statesData';
+
 import MapView from './components/MapView';
 import Search from './components/Search';
 import Info from './components/Info';
@@ -25,18 +27,53 @@ function App() {
   const { setCaseData } = useContext(CaseContext);
 
   useEffect(() => {
+    const url1 = 'https://coronavirus-tracker-api.herokuapp.com/v2/locations';
+    const url2 =
+      'https://coronavirus-tracker-api.herokuapp.com/v2/locations?source=csbs';
+
     axios
-      .get('https://coronavirus-tracker-api.herokuapp.com/v2/locations')
-      .then((res) => {
-        const cases = Array.from(res.data.locations);
-        let tmp = [];
-        cases.forEach((item) => {
-          tmp = [...tmp, item];
-        });
-        setCaseData(
-          tmp.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
-        );
-      })
+      .all([axios.get(url1), axios.get(url2)])
+      .then(
+        axios.spread((res, resUS) => {
+          const cases = Array.from(res.data.locations);
+          let tmp = [];
+
+          cases.forEach((item) => {
+            item.level = 0;
+            item.key = item.id + item.country + item.province;
+            if (item.country === 'US') item.level = 1;
+            tmp = [...tmp, item];
+          });
+
+          const casesUS = Array.from(resUS.data.locations);
+          casesUS.forEach((item) => {
+            //new state
+            const index = tmp.map((e) => e.province).indexOf(item.province);
+            if (index === -1) {
+              item.county = '';
+              item.level = 2;
+              item.key = item.id + item.country + item.province;
+              const stateItem = statesData.find(
+                (e) => e.name === item.province
+              );
+              if (stateItem) {
+                item.coordinates.latitude = stateItem.latitude;
+                item.coordinates.longitude = stateItem.longitude;
+                tmp = [...tmp, item];
+              }
+            } // existing state
+            else {
+              // console.log(item);
+              tmp[index].latest.confirmed += item.latest.confirmed;
+              tmp[index].latest.deaths += item.latest.deaths;
+              tmp[index].latest.recovered += item.latest.recovered;
+            }
+          });
+          setCaseData(
+            tmp.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
+          );
+        })
+      )
       .catch((error) => console.log(error));
   }, [setCaseData]);
   return (

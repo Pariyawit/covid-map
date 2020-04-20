@@ -21,6 +21,7 @@ latest:
 
 const divIconObject = (data, country, zoom) => {
   const size = zoom / 3;
+
   if (data.latest.confirmed >= 100000) {
     return {
       className:
@@ -82,6 +83,7 @@ function MapView(props) {
   const mapEl = useRef(null);
 
   const handleZoom = (e) => {
+    console.log(mapEl.current.leafletElement._zoom);
     setZoom(mapEl.current.leafletElement._zoom);
     if (mapEl.current.leafletElement._zoom < 2) {
       setZoom(2);
@@ -95,14 +97,21 @@ function MapView(props) {
     setShowAbout(false);
   };
 
-  const markers = caseData.map((data) => (
-    <Marker
-      key={data.id}
-      position={[data.coordinates.latitude, data.coordinates.longitude]}
-      icon={divIcon(divIconObject(data, country, zoom))}
-      onClick={(e) => clickMarker(data.id)}
-    ></Marker>
-  ));
+  const markers = caseData
+    .filter((data) => {
+      if (data.level === 0) return true;
+      if (zoom < 4 && data.level === 1) return true;
+      if (zoom >= 4 && data.level === 2) return true;
+      return false;
+    })
+    .map((data) => (
+      <Marker
+        key={data.key}
+        position={[data.coordinates.latitude, data.coordinates.longitude]}
+        icon={divIcon(divIconObject(data, country, zoom))}
+        onClick={(e) => clickMarker(data.key)}
+      ></Marker>
+    ));
 
   return (
     <Map

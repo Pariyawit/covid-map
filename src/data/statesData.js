@@ -1,4 +1,4 @@
-export const states = [
+export const statesData = [
   {
     state: 'AK',
     latitude: 63.588753,
