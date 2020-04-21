@@ -25,7 +25,7 @@ const divIconObject = (data, country, zoom) => {
   if (data.latest.confirmed >= 100000) {
     return {
       className:
-        data.id === (country && country.id)
+        data.key === (country && country.key)
           ? 'marker-icon marker-icon--dark-purple active'
           : 'marker-icon marker-icon--dark-purple',
       iconSize: [48 * size, 48 * size],
@@ -34,7 +34,7 @@ const divIconObject = (data, country, zoom) => {
   if (data.latest.confirmed >= 10000) {
     return {
       className:
-        data.id === (country && country.id)
+        data.key === (country && country.key)
           ? 'marker-icon marker-icon--purple active'
           : 'marker-icon marker-icon--purple',
       iconSize: [40 * size, 40 * size],
@@ -42,7 +42,7 @@ const divIconObject = (data, country, zoom) => {
   } else if (data.latest.confirmed >= 1000) {
     return {
       className:
-        data.id === (country && country.id)
+        data.key === (country && country.key)
           ? 'marker-icon marker-icon--red active'
           : 'marker-icon marker-icon--red',
       iconSize: [32 * size, 32 * size],
@@ -50,7 +50,7 @@ const divIconObject = (data, country, zoom) => {
   } else if (data.latest.confirmed >= 100) {
     return {
       className:
-        data.id === (country && country.id)
+        data.key === (country && country.key)
           ? 'marker-icon marker-icon--orange active'
           : 'marker-icon marker-icon--orange',
       iconSize: [24 * size, 24 * size],
@@ -58,7 +58,7 @@ const divIconObject = (data, country, zoom) => {
   } else {
     return {
       className:
-        data.id === (country && country.id)
+        data.key === (country && country.key)
           ? 'marker-icon marker-icon--green active'
           : 'marker-icon marker-icon--green',
       iconSize: [16 * size, 16 * size],
@@ -76,14 +76,14 @@ function MapView(props) {
     setShowInfo,
     setShowSearch,
     setShowAbout,
+    zoom,
+    setZoom,
   } = useContext(CaseContext);
-
-  const [zoom, setZoom] = useState(3);
 
   const mapEl = useRef(null);
 
   const handleZoom = (e) => {
-    console.log(mapEl.current.leafletElement._zoom);
+    // console.log(mapEl.current.leafletElement._zoom);
     setZoom(mapEl.current.leafletElement._zoom);
     if (mapEl.current.leafletElement._zoom < 2) {
       setZoom(2);
@@ -124,8 +124,8 @@ function MapView(props) {
       onZoomEnd={handleZoom}
       options={{ minZoom: 2 }}
       maxBounds={[
-        [-75, -200],
-        [85, 200],
+        [-75, -220],
+        [85, 220],
       ]}
     >
       <TileLayer
