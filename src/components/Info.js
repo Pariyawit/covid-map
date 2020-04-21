@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { CaseContext } from './../context/CaseContext';
+import Stat from './Stat';
 
 export default function Info() {
   const { country, showInfo } = useContext(CaseContext);
@@ -7,6 +8,7 @@ export default function Info() {
   const infoClass = showInfo ? 'info card' : 'info card hide';
   return (
     <div className={infoClass} style={{ zIndex: 1000 }}>
+      <Stat></Stat>
       {country && showInfo ? (
         <>
           <h3 className='info__title'>
