@@ -13,7 +13,7 @@ export default function Info() {
             {country.province && `${country.province}, `}
             {country.country}
           </h3>
-          <p className='info__description'>
+          <p className='info__description' data-key={country.key}>
             Confirmed: {country.latest.confirmed.toLocaleString()}
             <br />
             Deaths: {country.latest.deaths.toLocaleString()}

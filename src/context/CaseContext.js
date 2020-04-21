@@ -9,6 +9,7 @@ function CaseContextProvider(props) {
   const [showSearch, setShowSearch] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [zoom, setZoom] = useState(3);
 
   const clickMarker = (key) => {
     console.log(key);
@@ -17,6 +18,8 @@ function CaseContextProvider(props) {
     setCountry(data);
     setShowInfo(true);
     setShowAbout(false);
+    if (!(zoom < 4) && data.level === 'country') setZoom(3);
+    if (!(zoom >= 4) && data.level === 'province') setZoom(4);
   };
 
   const context = {
@@ -32,6 +35,8 @@ function CaseContextProvider(props) {
     setShowInfo,
     showAbout,
     setShowAbout,
+    zoom,
+    setZoom,
   };
 
   return (

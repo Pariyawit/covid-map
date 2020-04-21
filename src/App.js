@@ -112,6 +112,18 @@ function App() {
               list[index].latest.recovered += item.latest.recovered;
             }
           });
+
+          //remove duplicate country
+          list.forEach((data, index) => {
+            if (data.level === 'country') {
+              list.forEach((c) => {
+                if (c.country === data.country && c.level === 'all') {
+                  list.splice(index, 1);
+                }
+              });
+            }
+          });
+
           setCaseData(
             list.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
           );
