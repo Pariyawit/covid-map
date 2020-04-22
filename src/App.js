@@ -20,7 +20,7 @@ import Loader from './components/Loader';
 
 function isExpired(time1, time2) {
   console.log({ time1, time2 });
-  const expire = 1000 * 60 * 60 * 6; // 12hr
+  const expire = 1000 * 60 * 30; // 30min
   if (time2 - time1 > expire) {
     return true;
   }
