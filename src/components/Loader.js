@@ -10,13 +10,15 @@ function Loader({ loading, error }) {
       {!error ? (
         <img src={loader_path} />
       ) : (
-        <p>
+        <div className='error-message'>
           <h2>Something went wrong</h2>
-          Sorry, something went wrong here. Please try again later.
-          <br />
-          Meanwhile, please visit my website{' '}
-          <a href='https://pariyawit.com'>pariyawit.com</a>
-        </p>
+          <p>
+            Sorry, something went wrong here. Please try again later.
+            <br />
+            Meanwhile, please visit my website{' '}
+            <a href='https://pariyawit.com'>pariyawit.com</a>
+          </p>
+        </div>
       )}
     </div>
   );
