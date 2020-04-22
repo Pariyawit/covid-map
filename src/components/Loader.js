@@ -8,7 +8,7 @@ function Loader({ loading, error }) {
   return (
     <div className={loaderClass} style={{ zIndex: 1000 }}>
       {!error ? (
-        <img src={loader_path} />
+        <img src={loader_path} alt='loading' />
       ) : (
         <div className='error-message'>
           <h2>Something went wrong</h2>

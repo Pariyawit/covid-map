@@ -52,7 +52,8 @@ function prepareData(timelineObj) {
   return result;
 }
 
-function handleMultipleRequests(ids, setData) {
+function handleMultipleRequests(country, setData, setLoading, setFill) {
+  const ids = country.ids;
   console.log(ids);
   const urls = ids.map(
     (id) => `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${id}`
@@ -72,37 +73,45 @@ function handleMultipleRequests(ids, setData) {
           return obj;
         }, init);
         setData(prepareData(timelineObj));
+        setLoading(false);
+        assignFill(setFill, country.latest.confirmed);
       })
     )
     .catch((errors) => console.log(errors));
+}
+
+function assignFill(setFill, confirm) {
+  if (confirm >= 100000) setFill('#6b48b6');
+  else if (confirm >= 10000) setFill('#b44cc5');
+  else if (confirm >= 1000) setFill('#c85050');
+  else if (confirm >= 100) setFill('#c8b550');
+  else setFill('#7cc64f');
 }
 
 function Stat() {
   const { country } = useContext(CaseContext);
   const [data, setData] = useState([]);
   const [fill, setFill] = useState('#a0a0a0');
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     //2020-03-15
     if (country) {
-      let urlTimeseries = `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${country.id}`;
-      if (country.country_code === 'US' && country.level === 'province') {
-        urlTimeseries += '?source=nyt&timelines=true';
-      }
       console.log(country);
-      if (country.ids && country.level !== 'county') {
+      if (country.country === 'US' && country.level === 'province') {
+        //not support US State yet
         setData([]);
-        handleMultipleRequests(country.ids, setData);
+      } else if (country.ids) {
+        setLoading(true);
+        // setData([]);
+        handleMultipleRequests(country, setData, setLoading, setFill);
       } else {
+        setLoading(true);
+        let urlTimeseries = `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${country.id}`;
         axios.get(urlTimeseries).then((res) => {
           const timelineObj = res.data.location.timelines.confirmed.timeline;
-
+          setLoading(false);
           setData(prepareData(timelineObj));
-          const confirm = country.latest.confirmed;
-          if (confirm >= 100000) setFill('#6b48b6');
-          else if (confirm >= 10000) setFill('#b44cc5');
-          else if (confirm >= 1000) setFill('#c85050');
-          else if (confirm >= 100) setFill('#c8b550');
-          else setFill('#7cc64f');
+          assignFill(setFill, country.latest.confirmed);
         });
       }
     }
@@ -143,6 +152,11 @@ function Stat() {
         </ComposedChart>
       ) : (
         <p className='stat stat__info'>Data not avaliable</p>
+      )}
+      {loading && (
+        <div className='stat stat__loader-wrapper'>
+          <img className='stat__loader' src='/loader.svg' alt='loading' />
+        </div>
       )}
     </div>
   );
