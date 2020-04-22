@@ -254,7 +254,7 @@ h6 {
   display: flex;
   justify-content: center;
   justify-items: center;
-  p {
+  &__info {
     min-height: 150px;
     font-size: 1.6rem;
     color: $text-secondary;

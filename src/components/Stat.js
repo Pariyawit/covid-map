@@ -128,7 +128,7 @@ function Stat() {
           />
         </ComposedChart>
       ) : (
-        <p>Data not avaliable</p>
+        <p className='stat stat__info'>Data not avaliable</p>
       )}
     </div>
   );
