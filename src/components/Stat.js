@@ -2,22 +2,16 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   ComposedChart,
   Line,
-  Area,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  Scatter,
 } from 'recharts';
 
 import { CaseContext } from './../context/CaseContext';
 import axios from 'axios';
-
-function n(n) {
-  return n > 9 ? '' + n : '0' + n;
-}
 
 function dateToString(JSONdate) {
   const m = [
@@ -41,7 +35,7 @@ function dateToString(JSONdate) {
 function Stat() {
   const { country } = useContext(CaseContext);
   const [data, setData] = useState([]);
-  const [dataMax, setDataMax] = useState(0);
+  const [fill, setFill] = useState('#a0a0a0');
   useEffect(() => {
     //2020-03-15
     if (country) {
@@ -53,34 +47,65 @@ function Stat() {
         const timelineObj = res.data.location.timelines.confirmed.timeline;
         const dates = Object.keys(timelineObj);
         let latestDate = dates.splice(-dayPass - 1);
-        console.log(latestDate);
         let prevConfirm = 0;
         const result = latestDate.map((date) => {
+          const newCase = timelineObj[date] - prevConfirm;
           const obj = {
             date: dateToString(date),
-            total: timelineObj[date],
-            new: timelineObj[date] - prevConfirm,
+            cumulative: timelineObj[date],
+            new: newCase > 0 ? newCase : 0,
           };
           prevConfirm = timelineObj[date];
           return obj;
         });
         result.shift();
         setData(result);
-        setDataMax(result[6].total);
+        const confirm = country.latest.confirmed;
+        if (confirm >= 100000) setFill('#6b48b6');
+        else if (confirm >= 10000) setFill('#b44cc5');
+        else if (confirm >= 1000) setFill('#c85050');
+        else if (confirm >= 100) setFill('#c8b550');
+        else setFill('#7cc64f');
       });
     }
   }, [country]);
 
+  const style = {
+    display: 'flex',
+    justifyContent: 'center',
+  };
+
   return (
-    <div>
-      <ComposedChart width={320} height={300} data={data}>
+    <div style={style}>
+      <ComposedChart width={320} height={150} data={data}>
         <CartesianGrid stroke='#f5f5f5' />
         <XAxis dataKey='date' />
-        <YAxis yAxisId='left' type='number' orientation='left' />
-        <YAxis yAxisId='right' type='number' orientation='right' />
+        <YAxis
+          yAxisId='right'
+          type='number'
+          orientation='right'
+          allowDecimals={false}
+          name='Cumulative'
+          domain={[0, 'auto']}
+        />
+        <YAxis
+          yAxisId='left'
+          type='number'
+          orientation='left'
+          domain={[0, 'auto']}
+          allowDecimals={false}
+          name='New'
+        />
         <Tooltip />
-        <Bar yAxisId='right' dataKey='new' barSize={20} fill='#a0a0a0' />
-        <Line yAxisId='left' type='monotone' dataKey='total' stroke='#45707C' />
+        <Legend />
+        <Bar yAxisId='left' dataKey='new' barSize={20} fill={fill} />
+        <Line
+          yAxisId='right'
+          type='monotone'
+          dataKey='cumulative'
+          stroke='#45707C'
+          dot={false}
+        />
       </ComposedChart>
     </div>
   );
