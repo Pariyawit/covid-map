@@ -261,6 +261,15 @@ h6 {
     line-height: 150px;
     margin: 0;
   }
+  &__loader-wrapper {
+    min-height: 100px;
+    position: absolute;
+  }
+  &__loader {
+    height: 25px;
+    width: 25px;
+    margin: auto;
+  }
 }
 
 /*

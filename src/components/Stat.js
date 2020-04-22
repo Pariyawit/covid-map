@@ -32,64 +32,88 @@ function dateToString(JSONdate) {
   return `${date.getDate()} ${m[date.getMonth()]}`;
 }
 
-function handleMultipleRequests(ids) {
+const DAY_PASS = 30;
+
+function prepareData(timelineObj) {
+  const dates = Object.keys(timelineObj);
+  let latestDate = dates.splice(-DAY_PASS - 1);
+  let prevConfirm = 0;
+  const result = latestDate.map((date) => {
+    const newCase = timelineObj[date] - prevConfirm;
+    const obj = {
+      date: dateToString(date),
+      cumulative: timelineObj[date],
+      new: newCase > 0 ? newCase : 0,
+    };
+    prevConfirm = timelineObj[date];
+    return obj;
+  });
+  result.shift();
+  return result;
+}
+
+function handleMultipleRequests(country, setData, setLoading, setFill) {
+  const ids = country.ids;
   console.log(ids);
   const urls = ids.map(
-    (id) =>
-      `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${id}?source=nyt&timelines=true`
+    (id) => `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${id}`
   );
   axios
     .all(urls.map((url) => axios.get(url)))
     .then(
       axios.spread((...responses) => {
-        console.log(responses);
+        let timelineObjs = responses.map(
+          (res) => res.data.location.timelines.confirmed.timeline
+        );
+        const init = timelineObjs[0];
+        timelineObjs.shift();
+        const timelineObj = timelineObjs.reduce((total, obj) => {
+          Object.keys(obj).map((key) => (obj[key] += total[key]));
+          return obj;
+        }, init);
+        setData(prepareData(timelineObj));
+        setLoading(false);
+        assignFill(setFill, country.latest.confirmed);
       })
     )
     .catch((errors) => console.log(errors));
+}
+
+function handleSingleRequests(country, setData, setLoading, setFill) {
+  let urlTimeseries = `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${country.id}`;
+  axios.get(urlTimeseries).then((res) => {
+    const timelineObj = res.data.location.timelines.confirmed.timeline;
+    setLoading(false);
+    setData(prepareData(timelineObj));
+    assignFill(setFill, country.latest.confirmed);
+  });
+}
+
+function assignFill(setFill, confirm) {
+  if (confirm >= 100000) setFill('#6b48b6');
+  else if (confirm >= 10000) setFill('#b44cc5');
+  else if (confirm >= 1000) setFill('#c85050');
+  else if (confirm >= 100) setFill('#c8b550');
+  else setFill('#7cc64f');
 }
 
 function Stat() {
   const { country } = useContext(CaseContext);
   const [data, setData] = useState([]);
   const [fill, setFill] = useState('#a0a0a0');
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    //2020-03-15
     if (country) {
-      // const startDate = new Date(Date(latestDate)
-      const dayPass = 30;
-      let urlTimeseries = `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${country.id}`;
-      //?source=nyt&timelines=true
-      if (country.country_code === 'US' && country.level === 'province') {
-        urlTimeseries += '?source=nyt&timelines=true';
-      }
       console.log(country);
-      if (country.ids) {
+      if (country.country === 'US' && country.level === 'province') {
+        //not support US State yet
         setData([]);
+      } else if (country.ids) {
+        setLoading(true);
+        handleMultipleRequests(country, setData, setLoading, setFill);
       } else {
-        axios.get(urlTimeseries).then((res) => {
-          const timelineObj = res.data.location.timelines.confirmed.timeline;
-          const dates = Object.keys(timelineObj);
-          let latestDate = dates.splice(-dayPass - 1);
-          let prevConfirm = 0;
-          const result = latestDate.map((date) => {
-            const newCase = timelineObj[date] - prevConfirm;
-            const obj = {
-              date: dateToString(date),
-              cumulative: timelineObj[date],
-              new: newCase > 0 ? newCase : 0,
-            };
-            prevConfirm = timelineObj[date];
-            return obj;
-          });
-          result.shift();
-          setData(result);
-          const confirm = country.latest.confirmed;
-          if (confirm >= 100000) setFill('#6b48b6');
-          else if (confirm >= 10000) setFill('#b44cc5');
-          else if (confirm >= 1000) setFill('#c85050');
-          else if (confirm >= 100) setFill('#c8b550');
-          else setFill('#7cc64f');
-        });
+        setLoading(true);
+        handleSingleRequests(country, setData, setLoading, setFill);
       }
     }
   }, [country]);
@@ -129,6 +153,11 @@ function Stat() {
         </ComposedChart>
       ) : (
         <p className='stat stat__info'>Data not avaliable</p>
+      )}
+      {loading && (
+        <div className='stat stat__loader-wrapper'>
+          <img className='stat__loader' src='/loader.svg' alt='loading' />
+        </div>
       )}
     </div>
   );
