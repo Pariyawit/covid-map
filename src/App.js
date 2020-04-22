@@ -40,8 +40,8 @@ function App() {
   const { setCaseData } = useContext(CaseContext);
 
   useEffect(() => {
-    const data = localStorage.getItem('covid-map');
-    // const data = null;
+    // const data = localStorage.getItem('covid-map');
+    const data = null;
     if (data && !isExpired(JSON.parse(data).timestamp, new Date().getTime())) {
       console.log('useLocalStorage');
       const obj = JSON.parse(data);
@@ -71,6 +71,7 @@ function App() {
                 } else {
                   item.level = 'province';
                   item.key = item.id + item.country + item.province;
+                  item.ids = [item.id];
                   list = [...list, item];
 
                   let tmpItem = {
@@ -95,7 +96,6 @@ function App() {
                     if (countryItem) {
                       tmpItem.coordinates.latitude = countryItem.LAT;
                       tmpItem.coordinates.longitude = countryItem.LONG;
-                      tmpItem.ids = [countryItem.id];
                       list = [...list, tmpItem];
                     }
                   } // existing state

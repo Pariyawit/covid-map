@@ -32,17 +32,46 @@ function dateToString(JSONdate) {
   return `${date.getDate()} ${m[date.getMonth()]}`;
 }
 
-function handleMultipleRequests(ids) {
+const DAY_PASS = 30;
+
+function prepareData(timelineObj) {
+  const dates = Object.keys(timelineObj);
+  let latestDate = dates.splice(-DAY_PASS - 1);
+  let prevConfirm = 0;
+  const result = latestDate.map((date) => {
+    const newCase = timelineObj[date] - prevConfirm;
+    const obj = {
+      date: dateToString(date),
+      cumulative: timelineObj[date],
+      new: newCase > 0 ? newCase : 0,
+    };
+    prevConfirm = timelineObj[date];
+    return obj;
+  });
+  result.shift();
+  return result;
+}
+
+function handleMultipleRequests(ids, setData) {
   console.log(ids);
   const urls = ids.map(
-    (id) =>
-      `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${id}?source=nyt&timelines=true`
+    (id) => `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${id}`
   );
   axios
     .all(urls.map((url) => axios.get(url)))
     .then(
       axios.spread((...responses) => {
-        console.log(responses);
+        let timelineObjs = responses.map(
+          (res) => res.data.location.timelines.confirmed.timeline
+        );
+        console.log(timelineObjs);
+        const init = timelineObjs[0];
+        timelineObjs.shift();
+        const timelineObj = timelineObjs.reduce((total, obj) => {
+          Object.keys(obj).map((key) => (obj[key] += total[key]));
+          return obj;
+        }, init);
+        setData(prepareData(timelineObj));
       })
     )
     .catch((errors) => console.log(errors));
@@ -55,34 +84,19 @@ function Stat() {
   useEffect(() => {
     //2020-03-15
     if (country) {
-      // const startDate = new Date(Date(latestDate)
-      const dayPass = 30;
       let urlTimeseries = `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${country.id}`;
-      //?source=nyt&timelines=true
       if (country.country_code === 'US' && country.level === 'province') {
         urlTimeseries += '?source=nyt&timelines=true';
       }
       console.log(country);
-      if (country.ids) {
+      if (country.ids && country.level !== 'county') {
         setData([]);
+        handleMultipleRequests(country.ids, setData);
       } else {
         axios.get(urlTimeseries).then((res) => {
           const timelineObj = res.data.location.timelines.confirmed.timeline;
-          const dates = Object.keys(timelineObj);
-          let latestDate = dates.splice(-dayPass - 1);
-          let prevConfirm = 0;
-          const result = latestDate.map((date) => {
-            const newCase = timelineObj[date] - prevConfirm;
-            const obj = {
-              date: dateToString(date),
-              cumulative: timelineObj[date],
-              new: newCase > 0 ? newCase : 0,
-            };
-            prevConfirm = timelineObj[date];
-            return obj;
-          });
-          result.shift();
-          setData(result);
+
+          setData(prepareData(timelineObj));
           const confirm = country.latest.confirmed;
           if (confirm >= 100000) setFill('#6b48b6');
           else if (confirm >= 10000) setFill('#b44cc5');
