@@ -20,7 +20,7 @@ import Loader from './components/Loader';
 
 function isExpired(time1, time2) {
   console.log({ time1, time2 });
-  const expire = 1000 * 60 * 60 * 12; // 12hr
+  const expire = 1000 * 60 * 60 * 6; // 12hr
   if (time2 - time1 > expire) {
     return true;
   }
@@ -41,6 +41,7 @@ function App() {
 
   useEffect(() => {
     const data = localStorage.getItem('covid-map');
+    // const data = null;
     if (data && !isExpired(JSON.parse(data).timestamp, new Date().getTime())) {
       console.log('useLocalStorage');
       const obj = JSON.parse(data);
@@ -94,6 +95,7 @@ function App() {
                     if (countryItem) {
                       tmpItem.coordinates.latitude = countryItem.LAT;
                       tmpItem.coordinates.longitude = countryItem.LONG;
+                      tmpItem.ids = [countryItem.id];
                       list = [...list, tmpItem];
                     }
                   } // existing state
@@ -101,6 +103,7 @@ function App() {
                     list[index].latest.confirmed += tmpItem.latest.confirmed;
                     list[index].latest.deaths += tmpItem.latest.deaths;
                     list[index].latest.recovered += tmpItem.latest.recovered;
+                    list[index].ids.push(tmpItem.id);
                   }
                 }
               });
@@ -113,6 +116,7 @@ function App() {
                 item.county = '';
                 item.level = 'province';
                 item.key = item.id + item.country + item.province;
+                item.ids = [item.id];
                 const stateItem = statesData.find(
                   (e) => e.name === item.province
                 );
@@ -127,6 +131,7 @@ function App() {
                 list[index].latest.confirmed += item.latest.confirmed;
                 list[index].latest.deaths += item.latest.deaths;
                 list[index].latest.recovered += item.latest.recovered;
+                list[index].ids.push(item.id);
               }
             });
 

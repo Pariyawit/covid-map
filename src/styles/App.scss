@@ -250,6 +250,19 @@ h6 {
   transition: opacity ease-in-out 0.5s;
 }
 
+.stat {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  p {
+    min-height: 150px;
+    font-size: 1.6rem;
+    color: $text-secondary;
+    line-height: 150px;
+    margin: 0;
+  }
+}
+
 /*
 transition
 */
