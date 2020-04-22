@@ -40,8 +40,8 @@ function App() {
   const { setCaseData } = useContext(CaseContext);
 
   useEffect(() => {
-    // const data = localStorage.getItem('covid-map');
-    const data = null;
+    const data = localStorage.getItem('covid-map');
+    // const data = null;
     if (data && !isExpired(JSON.parse(data).timestamp, new Date().getTime())) {
       console.log('useLocalStorage');
       const obj = JSON.parse(data);
