@@ -117,7 +117,7 @@ h6 {
   min-height: 120px;
 
   &.hide {
-    bottom: -200px;
+    bottom: -600px;
   }
   transition: bottom 0.5s ease-in-out, height 0.2s ease-in-out;
 
@@ -128,6 +128,7 @@ h6 {
   &__description {
     font-size: 1.6rem;
     line-height: 2rem;
+    margin: 0.8rem 0;
   }
 }
 
@@ -226,18 +227,18 @@ h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  h2 {
-    padding-bottom: 1.6rem;
-  }
-  p {
+  .error-message {
     color: white;
     font-size: 1.6rem;
     margin: 1.6rem;
     line-height: 2.4rem;
-  }
-  a {
-    color: white;
-    font-weight: bold;
+    h2 {
+      padding-bottom: 1.6rem;
+    }
+    a {
+      color: white;
+      font-weight: bold;
+    }
   }
   &--active {
     opacity: 1;
@@ -247,6 +248,19 @@ h6 {
     pointer-events: none;
   }
   transition: opacity ease-in-out 0.5s;
+}
+
+.stat {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  p {
+    min-height: 150px;
+    font-size: 1.6rem;
+    color: $text-secondary;
+    line-height: 150px;
+    margin: 0;
+  }
 }
 
 /*

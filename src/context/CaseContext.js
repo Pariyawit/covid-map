@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
+import L from 'leaflet';
 
 const CaseContext = React.createContext();
+
+function scale(zoom) {
+  return 256 * Math.pow(2, zoom);
+}
+
+function pixelScale(pixel, zoom) {
+  return pixel / scale(zoom);
+}
 
 function CaseContextProvider(props) {
   const [caseData, setCaseData] = useState([]);
@@ -14,7 +23,12 @@ function CaseContextProvider(props) {
   const clickMarker = (key) => {
     console.log(key);
     const data = caseData.find((data) => data.key === key);
-    setPosition([data.coordinates.latitude, data.coordinates.longitude]);
+
+    const newLat =
+      parseFloat(data.coordinates.latitude) - pixelScale(25000, zoom);
+
+    // console.log(newLat, data.coordinates.latitude);
+    setPosition([newLat, data.coordinates.longitude]);
     setCountry(data);
     setShowInfo(true);
     setShowAbout(false);

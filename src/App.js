@@ -18,6 +18,15 @@ import Info from './components/Info';
 import About from './components/About';
 import Loader from './components/Loader';
 
+function isExpired(time1, time2) {
+  console.log({ time1, time2 });
+  const expire = 1000 * 60 * 60 * 6; // 12hr
+  if (time2 - time1 > expire) {
+    return true;
+  }
+  return false;
+}
+
 function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -31,109 +40,128 @@ function App() {
   const { setCaseData } = useContext(CaseContext);
 
   useEffect(() => {
-    const url1 = 'https://coronavirus-tracker-api.herokuapp.com/v2/locations';
-    const url2 =
-      'https://coronavirus-tracker-api.herokuapp.com/v2/locations?source=csbs';
+    const data = localStorage.getItem('covid-map');
+    // const data = null;
+    if (data && !isExpired(JSON.parse(data).timestamp, new Date().getTime())) {
+      console.log('useLocalStorage');
+      const obj = JSON.parse(data);
+      setCaseData(obj.list);
+      setLoading(false);
+    } else {
+      console.log('fetching new data');
+      const url1 = 'https://coronavirus-tracker-api.herokuapp.com/v2/locations';
+      const url2 =
+        'https://coronavirus-tracker-api.herokuapp.com/v2/locations?source=csbs';
 
-    axios
-      .all([axios.get(url1), axios.get(url2)])
-      .then(
-        axios.spread((res, resUS) => {
-          const cases = Array.from(res.data.locations);
-          let list = [];
+      axios
+        .all([axios.get(url1), axios.get(url2)])
+        .then(
+          axios.spread((res, resUS) => {
+            const cases = Array.from(res.data.locations);
+            let list = [];
 
-          cases
-            // .filter((item) => item.country === 'Australia')
-            .forEach((item) => {
-              if (item.province === '') {
-                item.level = 'all';
-                item.key = item.id + item.country;
-                if (item.country === 'US') item.level = 'country';
-                list = [...list, item];
-              } else {
+            cases
+              // .filter((item) => item.country === 'Australia')
+              .forEach((item) => {
+                if (item.province === '') {
+                  item.level = 'all';
+                  item.key = item.id + item.country;
+                  if (item.country === 'US') item.level = 'country';
+                  list = [...list, item];
+                } else {
+                  item.level = 'province';
+                  item.key = item.id + item.country + item.province;
+                  list = [...list, item];
+
+                  let tmpItem = {
+                    ...item,
+                    latest: {
+                      ...item.latest,
+                    },
+                    coordinates: {
+                      ...item.coordinates,
+                    },
+                    province: '',
+                    level: 'country',
+                    key: item.id + item.country,
+                  };
+                  const index = list
+                    .map((e) => e.province + e.country)
+                    .indexOf(tmpItem.country);
+                  if (index === -1) {
+                    const countryItem = centroidsData.find(
+                      (e) => e.ISO3136 === item.country_code
+                    );
+                    if (countryItem) {
+                      tmpItem.coordinates.latitude = countryItem.LAT;
+                      tmpItem.coordinates.longitude = countryItem.LONG;
+                      tmpItem.ids = [countryItem.id];
+                      list = [...list, tmpItem];
+                    }
+                  } // existing state
+                  else {
+                    list[index].latest.confirmed += tmpItem.latest.confirmed;
+                    list[index].latest.deaths += tmpItem.latest.deaths;
+                    list[index].latest.recovered += tmpItem.latest.recovered;
+                    list[index].ids.push(tmpItem.id);
+                  }
+                }
+              });
+
+            const casesUS = Array.from(resUS.data.locations);
+            casesUS.forEach((item) => {
+              //new state
+              const index = list.map((e) => e.province).indexOf(item.province);
+              if (index === -1) {
+                item.county = '';
                 item.level = 'province';
                 item.key = item.id + item.country + item.province;
-                list = [...list, item];
-
-                let tmpItem = {
-                  ...item,
-                  latest: {
-                    ...item.latest,
-                  },
-                  coordinates: {
-                    ...item.coordinates,
-                  },
-                  province: '',
-                  level: 'country',
-                  key: item.id + item.country,
-                };
-                const index = list
-                  .map((e) => e.province + e.country)
-                  .indexOf(tmpItem.country);
-                if (index === -1) {
-                  const countryItem = centroidsData.find(
-                    (e) => e.ISO3136 === item.country_code
-                  );
-                  if (countryItem) {
-                    tmpItem.coordinates.latitude = countryItem.LAT;
-                    tmpItem.coordinates.longitude = countryItem.LONG;
-                    list = [...list, tmpItem];
-                  }
-                } // existing state
-                else {
-                  list[index].latest.confirmed += tmpItem.latest.confirmed;
-                  list[index].latest.deaths += tmpItem.latest.deaths;
-                  list[index].latest.recovered += tmpItem.latest.recovered;
+                item.ids = [item.id];
+                const stateItem = statesData.find(
+                  (e) => e.name === item.province
+                );
+                if (stateItem) {
+                  item.coordinates.latitude = stateItem.latitude;
+                  item.coordinates.longitude = stateItem.longitude;
+                  list = [...list, item];
                 }
+              } // existing state
+              else {
+                // console.log(item);
+                list[index].latest.confirmed += item.latest.confirmed;
+                list[index].latest.deaths += item.latest.deaths;
+                list[index].latest.recovered += item.latest.recovered;
+                list[index].ids.push(item.id);
               }
             });
 
-          const casesUS = Array.from(resUS.data.locations);
-          casesUS.forEach((item) => {
-            //new state
-            const index = list.map((e) => e.province).indexOf(item.province);
-            if (index === -1) {
-              item.county = '';
-              item.level = 'province';
-              item.key = item.id + item.country + item.province;
-              const stateItem = statesData.find(
-                (e) => e.name === item.province
-              );
-              if (stateItem) {
-                item.coordinates.latitude = stateItem.latitude;
-                item.coordinates.longitude = stateItem.longitude;
-                list = [...list, item];
+            //remove duplicate country
+            list.forEach((data, index) => {
+              if (data.level === 'country') {
+                list.forEach((c) => {
+                  if (c.country === data.country && c.level === 'all') {
+                    list.splice(index, 1);
+                  }
+                });
               }
-            } // existing state
-            else {
-              // console.log(item);
-              list[index].latest.confirmed += item.latest.confirmed;
-              list[index].latest.deaths += item.latest.deaths;
-              list[index].latest.recovered += item.latest.recovered;
-            }
-          });
+            });
 
-          //remove duplicate country
-          list.forEach((data, index) => {
-            if (data.level === 'country') {
-              list.forEach((c) => {
-                if (c.country === data.country && c.level === 'all') {
-                  list.splice(index, 1);
-                }
-              });
-            }
-          });
-
-          setCaseData(
-            list.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
-          );
-          setLoading(false);
-        })
-      )
-      .catch((error) => {
-        console.log(error);
-        setError(true);
-      });
+            setCaseData(
+              list.sort((a, b) => b.latest.confirmed - a.latest.confirmed)
+            );
+            setLoading(false);
+            const data = {
+              list,
+              timestamp: new Date().getTime(),
+            };
+            localStorage.setItem('covid-map', JSON.stringify(data));
+          })
+        )
+        .catch((error) => {
+          console.log(error);
+          setError(true);
+        });
+    }
   }, [setCaseData]);
   return (
     <div className='App'>
