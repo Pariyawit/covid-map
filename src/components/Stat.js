@@ -65,7 +65,6 @@ function handleMultipleRequests(country, setData, setLoading, setFill) {
         let timelineObjs = responses.map(
           (res) => res.data.location.timelines.confirmed.timeline
         );
-        console.log(timelineObjs);
         const init = timelineObjs[0];
         timelineObjs.shift();
         const timelineObj = timelineObjs.reduce((total, obj) => {
@@ -78,6 +77,16 @@ function handleMultipleRequests(country, setData, setLoading, setFill) {
       })
     )
     .catch((errors) => console.log(errors));
+}
+
+function handleSingleRequests(country, setData, setLoading, setFill) {
+  let urlTimeseries = `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${country.id}`;
+  axios.get(urlTimeseries).then((res) => {
+    const timelineObj = res.data.location.timelines.confirmed.timeline;
+    setLoading(false);
+    setData(prepareData(timelineObj));
+    assignFill(setFill, country.latest.confirmed);
+  });
 }
 
 function assignFill(setFill, confirm) {
@@ -94,7 +103,6 @@ function Stat() {
   const [fill, setFill] = useState('#a0a0a0');
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-    //2020-03-15
     if (country) {
       console.log(country);
       if (country.country === 'US' && country.level === 'province') {
@@ -102,17 +110,10 @@ function Stat() {
         setData([]);
       } else if (country.ids) {
         setLoading(true);
-        // setData([]);
         handleMultipleRequests(country, setData, setLoading, setFill);
       } else {
         setLoading(true);
-        let urlTimeseries = `https://coronavirus-tracker-api.herokuapp.com/v2/locations/${country.id}`;
-        axios.get(urlTimeseries).then((res) => {
-          const timelineObj = res.data.location.timelines.confirmed.timeline;
-          setLoading(false);
-          setData(prepareData(timelineObj));
-          assignFill(setFill, country.latest.confirmed);
-        });
+        handleSingleRequests(country, setData, setLoading, setFill);
       }
     }
   }, [country]);
